@@ -11,8 +11,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyCP57X_6iOxam8QyHMJG_8l2xbEuh38oxk",
   authDomain: "ucn-terminal.firebaseapp.com",
   projectId: "ucn-terminal",
-  storageBucket: "ucn-terminal.firebasestorage.app",
-  messagingSenderId: "871960027081",
   appId: "1:871960027081:web:f9287fd87fb7309888d218"
 };
 
