@@ -23,8 +23,9 @@ async function findUserByInviteCode(code) {
 }
 
 async function createProfile(uid, email, invitedBy = null) {
-  const inviteCode = generateInviteCode();
+  const inviteCode = "UCN-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
+  // 1. Create user profile
   await setDoc(doc(db, "users", uid), {
     profile: {
       email,
@@ -39,10 +40,39 @@ async function createProfile(uid, email, invitedBy = null) {
     }
   });
 
-  // store invite lookup table
+  // 2. Register invite lookup
   await setDoc(doc(db, "inviteCodes", inviteCode), {
     uid
   });
+
+  // 3. Create system messages (THIS replaces email)
+  const messagesRef = collection(db, "users", uid, "messages");
+
+  await setDoc(doc(messagesRef), {
+    type: "SYSTEM",
+    title: "COMMISSION CONFIRMED",
+    body: "Your UCN account has been successfully created. Standby for assignment.",
+    timestamp: Date.now(),
+    read: false
+  });
+
+  await setDoc(doc(messagesRef), {
+    type: "SYSTEM",
+    title: "FLEET NETWORK ACCESS",
+    body: "You are now connected to UCN Fleet Network. All activity is logged.",
+    timestamp: Date.now(),
+    read: false
+  });
+
+  if (invitedBy) {
+    await setDoc(doc(messagesRef), {
+      type: "SYSTEM",
+      title: "INVITATION VALIDATED",
+      body: "Your Fleet Invitation Code has been accepted. Your sponsor has been notified.",
+      timestamp: Date.now(),
+      read: false
+    });
+  }
 }
 
 window.register = async () => {
