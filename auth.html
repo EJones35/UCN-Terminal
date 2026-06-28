@@ -1,1 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
 
+<body class="starfield">
+
+<div class="panel" style="max-width:400px;margin:100px auto;">
+  <h2>UCN FLEET NETWORK AUTHENTICATION</h2>
+
+  <input id="email" placeholder="EMAIL">
+  <input id="password" type="password" placeholder="PASSWORD">
+
+  <button onclick="login()">AUTHENTICATE</button>
+  <button onclick="register()">REGISTER</button>
+
+  <div id="error"></div>
+</div>
+
+<script type="module" src="js/auth.js"></script>
+</body>
+</html>
