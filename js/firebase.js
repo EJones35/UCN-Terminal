@@ -3,10 +3,10 @@ import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gs
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCP57X_6iOxam8QyHMJG_8l2xbEuh38oxk",
+  authDomain: "ucn-terminal.firebaseapp.com",
+  projectId: "ucn-terminal",
+  appId: "1:871960027081:web:f9287fd87fb7309888d218"
 };
 
 export const app = initializeApp(firebaseConfig);
