@@ -1,1 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
 
+<body class="starfield">
+
+<div class="panel" style="margin:50px;">
+  <h1>UCN TERMINAL ONLINE</h1>
+  <p>Systems nominal.</p>
+
+  <button onclick="logout()">LOGOUT</button>
+</div>
+
+<script type="module">
+import { auth } from "./js/firebase.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+window.logout = async () => {
+  await signOut(auth);
+  window.location.href = "auth.html";
+};
+</script>
+
+</body>
+</html>
