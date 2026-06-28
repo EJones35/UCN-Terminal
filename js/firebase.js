@@ -1,11 +1,13 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+const FIREBASE_VERSION = "10.12.4";
+
+import { initializeApp } from `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`;
 import { 
   getAuth,
   setPersistence,
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { getFirestore } from `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`;
 
 const firebaseConfig = {
   apiKey: "AIzaSyCP57X_6iOxam8QyHMJG_8l2xbEuh38oxk",
