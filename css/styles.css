@@ -1,1 +1,76 @@
+:root {
+  --bg: #060e1a;
+  --panel: #0d1b2a;
+  --blue: #4a9eff;
+  --text: #e0e8f0;
+  --red: #ff4a4a;
+}
 
+body {
+  margin: 0;
+  font-family: "Exo 2", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* STARFIELD */
+.starfield::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 3px 3px;
+  animation: drift 120s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-200px); }
+}
+
+/* TERMINAL PANEL */
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(74,158,255,0.3);
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 0 20px rgba(74,158,255,0.1);
+}
+
+/* INPUTS */
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  background: #08121f;
+  border: 1px solid rgba(74,158,255,0.3);
+  color: var(--text);
+  font-family: inherit;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 10px rgba(74,158,255,0.4);
+}
+
+/* BUTTONS */
+button {
+  background: var(--blue);
+  border: none;
+  padding: 10px 14px;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 10px;
+}
+
+button:hover {
+  box-shadow: 0 0 12px rgba(74,158,255,0.6);
+}
+
+.glow-red {
+  color: var(--red);
+  text-shadow: 0 0 10px var(--red);
+}
