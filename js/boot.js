@@ -2,10 +2,13 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import {
   doc,
-  getDoc
+  getDoc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const logEl = document.getElementById("log");
+const ADMIN_EMAIL = "smidge+admin@garyjones.co.uk";
 
 function log(text) {
   if (logEl) logEl.textContent += text + "\n";
@@ -60,6 +63,20 @@ async function startBoot(user) {
     await signOut(auth);
     window.location.href = "auth.html?error=suspended";
     return;
+  }
+
+  const isAdmin = user.email === ADMIN_EMAIL;
+  const updates = {
+    "meta.lastLogin": serverTimestamp(),
+    "profile.email": user.email
+  };
+
+  if (isAdmin && !data.permissions?.admin) {
+    updates["permissions.admin"] = true;
+  }
+
+  if (Object.keys(updates).length > 0) {
+    await updateDoc(ref, updates);
   }
 
   log("PROFILE LOADED");
