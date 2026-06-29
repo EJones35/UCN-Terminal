@@ -16,6 +16,29 @@ import {
 const emailInput = document.getElementById("email");
 const passInput = document.getElementById("password");
 
+
+// -----------------------------
+// UCN CALLSIGN GENERATOR
+// -----------------------------
+function generateCallsign(uid) {
+    const prefixPool = ["TKN", "HAV", "UCN", "XO", "OPS", "ENG"];
+
+    const prefix = prefixPool[Math.floor(Math.random() * prefixPool.length)];
+
+    const numeric = uid
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .slice(0, 4)
+        .toUpperCase();
+
+    const number = parseInt(numeric, 36) % 9000;
+
+    return `${prefix}-${1000 + number}`;
+}
+
+
+// -----------------------------
+// USER BOOTSTRAP
+// -----------------------------
 async function ensureUserDocument(user) {
 
     const userRef = doc(db, "users", user.uid);
@@ -23,22 +46,39 @@ async function ensureUserDocument(user) {
 
     if (!snapshot.exists()) {
 
+        const callsign = generateCallsign(user.uid);
+
         await setDoc(userRef, {
 
-            displayName: "",
-            callsign: "",
-            rank: "Ensign",
+            profile: {
+                displayName: "",
+                callsign: callsign,
+                rank: "Ensign",
+                currentShipId: "",
+                role: "user"
+            },
 
-            currentShipId: "",
-
-            role: "user",
-
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp(),
+            personnel: {
+                serviceNumber: callsign,
+                biography: "",
+                photo: "",
+                medals: [],
+                previousAssignments: []
+            },
 
             settings: {
-                debug: true,
-                theme: "ucn"
+                theme: "ucn",
+                debug: true
+            },
+
+            statistics: {
+                missions: 0,
+                hoursServed: 0
+            },
+
+            meta: {
+                createdAt: serverTimestamp(),
+                lastLogin: serverTimestamp()
             }
 
         });
@@ -46,13 +86,16 @@ async function ensureUserDocument(user) {
     } else {
 
         await updateDoc(userRef, {
-            lastLogin: serverTimestamp()
+            "meta.lastLogin": serverTimestamp()
         });
 
     }
-
 }
 
+
+// -----------------------------
+// LOGIN
+// -----------------------------
 window.login = async () => {
 
     try {
@@ -76,6 +119,10 @@ window.login = async () => {
 
 };
 
+
+// -----------------------------
+// REGISTER
+// -----------------------------
 window.register = async () => {
 
     try {
@@ -99,10 +146,9 @@ window.register = async () => {
 
 };
 
-function showError(message) {
 
+function showError(message) {
     const el = document.getElementById("error");
     el.textContent = message;
     el.classList.add("glow-red");
-
 }
