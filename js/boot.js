@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase.js";
-
+console.log("BOOT FILE LOADED");
+console.log("CURRENT USER:", auth.currentUser);
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 import {
