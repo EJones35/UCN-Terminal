@@ -12,6 +12,8 @@ const firebaseConfig = {
   apiKey: "AIzaSyCP57X_6iOxam8QyHMJG_8l2xbEuh38oxk",
   authDomain: "ucn-terminal.firebaseapp.com",
   projectId: "ucn-terminal",
+  storageBucket: "ucn-terminal.appspot.com",
+  messagingSenderId: "871960027081",
   appId: "1:871960027081:web:f9287fd87fb7309888d218"
 };
 
@@ -20,6 +22,4 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-
-// 🔥 THIS IS THE FIX
-await setPersistence(auth, browserLocalPersistence);
+setPersistence(auth, browserLocalPersistence);

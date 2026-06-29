@@ -1,11 +1,20 @@
-const CACHE = "ucn-terminal-v1";
+const CACHE = "ucn-terminal-v2";
 
 const ASSETS = [
   "/",
   "/index.html",
   "/auth.html",
+  "/boot.html",
+  "/setup.html",
   "/home.html",
-  "/css/styles.css"
+  "/css/styles.css",
+  "/js/app.js",
+  "/js/firebase.js",
+  "/js/auth.js",
+  "/js/boot.js",
+  "/js/setup.js",
+  "/js/terminal.js",
+  "/manifest.json"
 ];
 
 self.addEventListener("install", (e) => {
@@ -17,5 +26,13 @@ self.addEventListener("install", (e) => {
 self.addEventListener("fetch", (e) => {
   e.respondWith(
     caches.match(e.request).then(res => res || fetch(e.request))
+  );
+});
+
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+    ))
   );
 });

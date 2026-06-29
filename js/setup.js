@@ -1,24 +1,24 @@
 import { auth, db } from "./firebase.js";
-
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import {
   doc,
   getDoc,
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-
 const displayNameInput = document.getElementById("displayName");
 const callsignInput = document.getElementById("callsign");
 const status = document.getElementById("status");
 
+let currentUser = null;
 
-async function loadExisting() {
-
-  const user = auth.currentUser;
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "auth.html";
     return;
   }
+
+  currentUser = user;
 
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
@@ -30,19 +30,13 @@ async function loadExisting() {
 
   const data = snap.data();
 
-  // preload callsign if it exists
   if (data.profile?.callsign) {
     callsignInput.value = data.profile.callsign;
   }
-
-}
-
+});
 
 window.saveIdentity = async () => {
-
-  const user = auth.currentUser;
-
-  if (!user) {
+  if (!currentUser) {
     window.location.href = "auth.html";
     return;
   }
@@ -55,7 +49,7 @@ window.saveIdentity = async () => {
     return;
   }
 
-  const ref = doc(db, "users", user.uid);
+  const ref = doc(db, "users", currentUser.uid);
 
   await updateDoc(ref, {
     "profile.displayName": displayName,
@@ -67,8 +61,4 @@ window.saveIdentity = async () => {
   setTimeout(() => {
     window.location.href = "boot.html";
   }, 1000);
-
 };
-
-
-loadExisting();

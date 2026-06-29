@@ -1,10 +1,12 @@
 {
   "name": "UCN Terminal",
-  "short_name": "UCN",
+  "short_name": "UCN Terminal",
+  "description": "UCN Fleet Network — Authenticated Operational Terminal",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#060e1a",
   "theme_color": "#0a1628",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon.png",

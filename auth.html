@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UCN AUTHENTICATION</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
@@ -10,10 +14,8 @@
 <div class="panel" style="max-width:400px;margin:100px auto;">
   <h2>UCN FLEET NETWORK AUTHENTICATION</h2>
 
-<input id="email" placeholder="EMAIL">
-<input id="password" type="password" placeholder="PASSWORD">
-
-<input id="invite" placeholder="FLEET INVITATION CODE (OPTIONAL)">
+  <input id="email" placeholder="EMAIL" type="email">
+  <input id="password" type="password" placeholder="PASSWORD">
 
   <button onclick="login()">AUTHENTICATE</button>
   <button onclick="register()">REGISTER</button>
@@ -21,6 +23,6 @@
   <div id="error"></div>
 </div>
 
-<script type="module" src="./js/auth.js"></script>
+<script type="module" src="js/auth.js"></script>
 </body>
 </html>
