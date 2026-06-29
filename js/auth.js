@@ -1,128 +1,108 @@
 import { auth, db } from "./firebase.js";
 
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  collection
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-function generateInviteCode() {
-  return "UCN-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-}
+const emailInput = document.getElementById("email");
+const passInput = document.getElementById("password");
 
-async function findUserByInviteCode(code) {
-  const snap = await getDoc(doc(db, "inviteCodes", code));
-  return snap.exists() ? snap.data().uid : null;
-}
+async function ensureUserDocument(user) {
 
-async function createProfile(uid, email, invitedBy = null) {
-  const inviteCode = "UCN-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const userRef = doc(db, "users", user.uid);
+    const snapshot = await getDoc(userRef);
 
-  // 1. Create user profile
-  await setDoc(doc(db, "users", uid), {
-    profile: {
-      email,
-      displayName: "New Officer",
-      callsign: "UNASSIGNED",
-      rank: "Ensign",
-      role: "user",
-      inviteCode,
-      invitedBy,
-      successfulInvites: 0,
-      createdAt: Date.now()
-    }
-  });
+    if (!snapshot.exists()) {
 
-  // 2. Register invite lookup
-  await setDoc(doc(db, "inviteCodes", inviteCode), {
-    uid
-  });
+        await setDoc(userRef, {
 
-  // 3. Create system messages (THIS replaces email)
-  const messagesRef = collection(db, "users", uid, "messages");
+            displayName: "",
+            callsign: "",
+            rank: "Ensign",
 
-  await setDoc(doc(messagesRef), {
-    type: "SYSTEM",
-    title: "COMMISSION CONFIRMED",
-    body: "Your UCN account has been successfully created. Standby for assignment.",
-    timestamp: Date.now(),
-    read: false
-  });
+            currentShipId: "",
 
-  await setDoc(doc(messagesRef), {
-    type: "SYSTEM",
-    title: "FLEET NETWORK ACCESS",
-    body: "You are now connected to UCN Fleet Network. All activity is logged.",
-    timestamp: Date.now(),
-    read: false
-  });
+            role: "user",
 
-  if (invitedBy) {
-    await setDoc(doc(messagesRef), {
-      type: "SYSTEM",
-      title: "INVITATION VALIDATED",
-      body: "Your Fleet Invitation Code has been accepted. Your sponsor has been notified.",
-      timestamp: Date.now(),
-      read: false
-    });
-  }
-}
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp(),
 
-window.register = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const invite = document.getElementById("invite")?.value || null;
+            settings: {
+                debug: true,
+                theme: "ucn"
+            }
 
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-
-    let inviterUid = null;
-
-    if (invite) {
-      inviterUid = await findUserByInviteCode(invite);
-
-      if (inviterUid) {
-        const inviterRef = doc(db, "users", inviterUid);
-        const inviterSnap = await getDoc(inviterRef);
-
-        const data = inviterSnap.data();
-
-        await updateDoc(inviterRef, {
-          "profile.successfulInvites": (data.profile.successfulInvites || 0) + 1
         });
-      }
+
+    } else {
+
+        await updateDoc(userRef, {
+            lastLogin: serverTimestamp()
+        });
+
     }
 
-    await createProfile(cred.user.uid, email, inviterUid);
-
-    window.location.href = "home.html";
-
-  } catch (err) {
-    showError(err.message);
-  }
-};
+}
 
 window.login = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "home.html";
-  } catch (err) {
-    showError("ACCESS DENIED");
-  }
+    try {
+
+        const credential = await signInWithEmailAndPassword(
+            auth,
+            emailInput.value,
+            passInput.value
+        );
+
+        await ensureUserDocument(credential.user);
+
+        window.location.href = "home.html";
+
+    } catch (err) {
+
+        console.error(err);
+        showError(err.message);
+
+    }
+
 };
 
-function showError(msg) {
-  const el = document.getElementById("error");
-  el.innerText = msg;
-  el.classList.add("glow-red");
+window.register = async () => {
+
+    try {
+
+        const credential = await createUserWithEmailAndPassword(
+            auth,
+            emailInput.value,
+            passInput.value
+        );
+
+        await ensureUserDocument(credential.user);
+
+        window.location.href = "home.html";
+
+    } catch (err) {
+
+        console.error(err);
+        showError(err.message);
+
+    }
+
+};
+
+function showError(message) {
+
+    const el = document.getElementById("error");
+    el.textContent = message;
+    el.classList.add("glow-red");
+
 }
