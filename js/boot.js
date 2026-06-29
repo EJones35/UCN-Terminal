@@ -8,27 +8,28 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 
-const statusEl = document.getElementById("status");
 const logEl = document.getElementById("log");
-
 
 function log(text) {
   if (logEl) logEl.textContent += text + "\n";
 }
-
 
 function wait(ms) {
   return new Promise(res => setTimeout(res, ms));
 }
 
 
-// -----------------------------
-// BOOT ENTRY POINT
-// -----------------------------
+// Prevent duplicate boot runs
+let bootRunning = false;
+
+
+// =============================
+// AUTH GATE (CRITICAL FIX)
+// =============================
 onAuthStateChanged(auth, async (user) => {
 
-  // mark that Firebase is now ready
-  authReady = true;
+  if (bootRunning) return;
+  bootRunning = true;
 
   console.log("AUTH STATE RESOLVED:", user);
 
@@ -42,9 +43,9 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 
-// -----------------------------
-// BOOT PROCESS
-// -----------------------------
+// =============================
+// BOOT SEQUENCE
+// =============================
 async function startBoot(user) {
 
   console.log("BOOT STARTED");
@@ -61,6 +62,10 @@ async function startBoot(user) {
   log("LOADING PERSONNEL DATABASE...");
   await wait(600);
 
+
+  // =============================
+  // LOAD FIRESTORE PROFILE
+  // =============================
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
@@ -84,9 +89,9 @@ async function startBoot(user) {
   await wait(500);
 
 
-  // -----------------------------
-  // IDENTITY CHECK (RULE B)
-  // -----------------------------
+  // =============================
+  // IDENTITY GATE (RULE B)
+  // =============================
   const missingIdentity =
     !data.profile?.displayName ||
     !data.profile?.callsign;
@@ -103,6 +108,9 @@ async function startBoot(user) {
   }
 
 
+  // =============================
+  // SUCCESS PATH
+  // =============================
   log("IDENTITY VERIFIED");
   await wait(400);
 
