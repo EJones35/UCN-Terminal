@@ -1,9 +1,13 @@
+console.log("BOOT SCRIPT LOADED");
+
 import { auth, db } from "./firebase.js";
 
 import {
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+console.log("USER DATA:", data);
 
 const statusEl = document.getElementById("status");
 const logEl = document.getElementById("log");
@@ -23,6 +27,7 @@ function wait(ms) {
 // BOOT PROCESS
 // -----------------------------
 async function startBoot() {
+  console.log("BOOT STARTED");
 
   const user = auth.currentUser;
 
