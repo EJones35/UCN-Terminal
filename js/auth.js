@@ -108,7 +108,7 @@ window.login = async () => {
 
         await ensureUserDocument(credential.user);
 
-        window.location.href = "home.html";
+        window.location.href = "boot.html";
 
     } catch (err) {
 
@@ -135,7 +135,7 @@ window.register = async () => {
 
         await ensureUserDocument(credential.user);
 
-        window.location.href = "home.html";
+        window.location.href = "boot.html";
 
     } catch (err) {
 
