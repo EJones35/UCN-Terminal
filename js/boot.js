@@ -27,7 +27,10 @@ function wait(ms) {
 // -----------------------------
 onAuthStateChanged(auth, async (user) => {
 
-  console.log("AUTH STATE:", user);
+  // mark that Firebase is now ready
+  authReady = true;
+
+  console.log("AUTH STATE RESOLVED:", user);
 
   if (!user) {
     window.location.href = "auth.html";
