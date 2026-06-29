@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UCN TERMINAL — ACCESS SUSPENDED</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    .suspended-icon { font-size: 48px; color: #ff4a4a; text-align: center; }
+  </style>
+</head>
+<body class="starfield">
+
+<div class="panel" style="max-width:500px;margin:100px auto;text-align:center;">
+  <div class="suspended-icon">&#9888;</div>
+  <h2>FLEET ACCESS SUSPENDED</h2>
+  <p>Your UCN Terminal access has been revoked.</p>
+  <p style="color:#ff4a4a;font-size:12px;">Contact Fleet Command for further information.</p>
+  <button onclick="goAuth()">RETURN TO AUTHENTICATION</button>
+</div>
+
+<script type="module">
+import { auth } from "./js/firebase.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    await signOut(auth);
+  }
+});
+
+window.goAuth = () => {
+  window.location.href = "auth.html";
+};
+</script>
+
+</body>
+</html>

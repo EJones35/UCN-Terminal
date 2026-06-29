@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UCN ADMIN PANEL</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(74,158,255,0.2); font-size: 14px; }
+    th { color: #4a9eff; font-weight: 600; }
+    .banned { color: #ff4a4a; }
+    .active { color: #4aff4a; }
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal { background: #0d1b2a; border: 1px solid rgba(74,158,255,0.3); padding: 20px; min-width: 350px; border-radius: 6px; }
+    .modal input, .modal select { width: 100%; padding: 8px; margin: 4px 0 10px; background: #08121f; border: 1px solid rgba(74,158,255,0.3); color: #e0e8f0; font-family: inherit; }
+    .modal select option { background: #0d1b2a; }
+    .modal .btn-row { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal .btn-row button { margin-top: 0; }
+    .badge-admin { color: #ffcc00; font-size: 11px; margin-left: 4px; }
+    #status { margin-top: 10px; }
+  </style>
+</head>
+<body class="starfield">
+
+<div class="panel" style="margin:30px;">
+  <h2>UCN FLEET ADMIN PANEL</h2>
+  <p><a href="home.html" style="color:#4a9eff;">&larr; RETURN TO TERMINAL</a></p>
+  <div id="status"></div>
+  <div id="loading">LOADING PERSONNEL DATABASE...</div>
+  <div id="user-table" style="display:none;"></div>
+  <div id="modal-area"></div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

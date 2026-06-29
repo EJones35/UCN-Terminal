@@ -26,12 +26,19 @@ onAuthStateChanged(auth, async (user) => {
   const data = snap.data();
   const profile = data.profile || {};
   const stats = data.statistics || {};
+  const permissions = data.permissions || {};
 
   const profileEl = document.getElementById("profile");
+  let adminLink = "";
+  if (permissions.admin) {
+    adminLink = '<p><a href="admin.html" style="color:#4a9eff;">ADMIN PANEL</a></p>';
+  }
+
   profileEl.innerHTML = `
     <p><strong>${profile.rank || "UNKNOWN"}</strong> ${profile.callsign || "---"}</p>
     <p>${profile.displayName || "Unidentified Personnel"}</p>
     <p>Missions: ${stats.missions || 0} | Hours Served: ${stats.hoursServed || 0}</p>
+    ${adminLink}
   `;
 });
 

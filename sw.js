@@ -1,4 +1,4 @@
-const CACHE = "ucn-terminal-v2";
+const CACHE = "ucn-terminal-v3";
 
 const ASSETS = [
   "/",
@@ -7,6 +7,8 @@ const ASSETS = [
   "/boot.html",
   "/setup.html",
   "/home.html",
+  "/admin.html",
+  "/suspended.html",
   "/css/styles.css",
   "/js/app.js",
   "/js/firebase.js",
@@ -14,6 +16,7 @@ const ASSETS = [
   "/js/boot.js",
   "/js/setup.js",
   "/js/terminal.js",
+  "/js/admin.js",
   "/manifest.json"
 ];
 
