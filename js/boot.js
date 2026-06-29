@@ -64,22 +64,20 @@ async function startBoot() {
   // -----------------------------
   // IDENTITY CHECK (YOUR RULE B)
   // -----------------------------
-  const missingIdentity =
-    !data.profile?.displayName ||
-    !data.profile?.callsign;
+const missingIdentity =
+  !data.profile?.displayName ||
+  !data.profile?.callsign;
 
+if (missingIdentity) {
 
-  if (missingIdentity) {
+  log("IDENTITY INCOMPLETE");
+  log("REDIRECTING TO PERSONNEL SETUP...");
 
-    log("IDENTITY INCOMPLETE");
-    log("REDIRECTING TO PERSONNEL SETUP...");
+  await wait(1200);
 
-    await wait(1200);
-
-    window.location.href = "home.html#setup";
-    return;
-
-  }
+  window.location.href = "setup.html";
+  return;
+}
 
 
   log("IDENTITY VERIFIED");
