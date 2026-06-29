@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UCN PERSONNEL SETUP</title>
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body class="starfield">
+
+<div class="panel" style="max-width:500px;margin:100px auto;">
+
+  <h2>UCN PERSONNEL INITIALISATION</h2>
+
+  <p>Identity verification required before terminal access.</p>
+
+  <input id="displayName" placeholder="DISPLAY NAME">
+  <input id="callsign" placeholder="CALLSIGN">
+
+  <button onclick="saveIdentity()">CONFIRM IDENTITY</button>
+
+  <p id="status"></p>
+
+</div>
+
+<script type="module" src="js/setup.js"></script>
+
+</body>
+</html>
