@@ -1,20 +1,19 @@
-console.log("BOOT SCRIPT LOADED");
-
 import { auth, db } from "./firebase.js";
+
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 import {
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-console.log("USER DATA:", data);
 
 const statusEl = document.getElementById("status");
 const logEl = document.getElementById("log");
 
 
 function log(text) {
-  logEl.textContent += text + "\n";
+  if (logEl) logEl.textContent += text + "\n";
 }
 
 
@@ -24,17 +23,28 @@ function wait(ms) {
 
 
 // -----------------------------
-// BOOT PROCESS
+// BOOT ENTRY POINT
 // -----------------------------
-async function startBoot() {
-  console.log("BOOT STARTED");
+onAuthStateChanged(auth, async (user) => {
 
-  const user = auth.currentUser;
+  console.log("AUTH STATE:", user);
 
   if (!user) {
     window.location.href = "auth.html";
     return;
   }
+
+  await startBoot(user);
+
+});
+
+
+// -----------------------------
+// BOOT PROCESS
+// -----------------------------
+async function startBoot(user) {
+
+  console.log("BOOT STARTED");
 
   log("UCN BOOT SEQUENCE INITIATED...");
   await wait(800);
@@ -42,7 +52,7 @@ async function startBoot() {
   log("CHECKING NETWORK LINK... OK");
   await wait(400);
 
-  log("AUTHENTICATION TOKEN VERIFIED");
+  log("AUTHENTICATION VERIFIED");
   await wait(400);
 
   log("LOADING PERSONNEL DATABASE...");
@@ -52,12 +62,17 @@ async function startBoot() {
   const snap = await getDoc(ref);
 
   if (!snap.exists()) {
+
     log("ERROR: USER PROFILE MISSING");
+    await wait(1000);
+
     window.location.href = "auth.html";
     return;
   }
 
   const data = snap.data();
+
+  console.log("USER DATA:", data);
 
   log("PROFILE LOADED");
   await wait(400);
@@ -67,22 +82,22 @@ async function startBoot() {
 
 
   // -----------------------------
-  // IDENTITY CHECK (YOUR RULE B)
+  // IDENTITY CHECK (RULE B)
   // -----------------------------
-const missingIdentity =
-  !data.profile?.displayName ||
-  !data.profile?.callsign;
+  const missingIdentity =
+    !data.profile?.displayName ||
+    !data.profile?.callsign;
 
-if (missingIdentity) {
+  if (missingIdentity) {
 
-  log("IDENTITY INCOMPLETE");
-  log("REDIRECTING TO PERSONNEL SETUP...");
+    log("IDENTITY INCOMPLETE");
+    log("REDIRECTING TO PERSONNEL SETUP...");
 
-  await wait(1200);
+    await wait(1200);
 
-  window.location.href = "setup.html";
-  return;
-}
+    window.location.href = "setup.html";
+    return;
+  }
 
 
   log("IDENTITY VERIFIED");
@@ -97,6 +112,3 @@ if (missingIdentity) {
   window.location.href = "home.html";
 
 }
-
-
-startBoot();
