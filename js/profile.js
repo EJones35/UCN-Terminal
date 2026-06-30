@@ -83,14 +83,28 @@ function renderProfile(data, user) {
     </div>
   `).join("");
 
-  const deps = stats.deploymentTypes || { military: 50, formation: 20, exploration: 10, cartography: 10, other: 10 };
-  renderPieChart(deps);
-
+  loadDeploymentChart(user.uid);
   loadRecentMissions(user.uid);
 
   document.getElementById("editCallsign").onclick = () => editField("callsign", p.callsign || "");
   document.getElementById("editPronouns").onclick = () => editField("pronouns", p.pronouns || "");
   document.getElementById("editBio").onclick = () => editField("biography", pers.biography || "", true);
+}
+
+async function loadDeploymentChart(uid) {
+  const q = query(
+    collection(db, "missions"),
+    where("completedByUid", "==", uid),
+    where("status", "==", "completed"),
+    orderBy("completedAt", "desc")
+  );
+  const snap = await getDocs(q);
+  const deps = {};
+  snap.forEach(d => {
+    const type = d.data().type || "other";
+    deps[type] = (deps[type] || 0) + 1;
+  });
+  renderPieChart(Object.keys(deps).length ? deps : { none: 1 });
 }
 
 async function loadRecentMissions(uid) {
@@ -111,7 +125,7 @@ async function loadRecentMissions(uid) {
     const m = d.data();
     html += `<div style="font-size:13px;padding:6px 10px;background:rgba(255,255,255,0.04);border-left:3px solid #4a9eff;">
       <strong>${escapeHtml(m.name)}</strong>
-      <span style="opacity:0.5;margin-left:10px;">${m.type || ""}</span>
+      <span style="opacity:0.5;margin-left:10px;">${m.type || ""} \u2022 ${m.role || ""}</span>
     </div>`;
   });
   html += "</div>";
@@ -150,12 +164,17 @@ function editField(field, current, multiline = false) {
 }
 
 function renderPieChart(deps) {
+  if (deps.none) {
+    el("pieChart").style.background = "#1a2a3a";
+    el("chartLegend").innerHTML = "<div style='opacity:0.4;font-size:11px;'>No mission data yet.</div>";
+    return;
+  }
   const total = Object.values(deps).reduce((a, b) => a + b, 0) || 1;
   let conic = [];
   let deg = 0;
   const legend = [];
 
-  DEPLOYMENT_TYPES.forEach((dt, i) => {
+  DEPLOYMENT_TYPES.forEach(dt => {
     const pct = ((deps[dt.key] || 0) / total) * 100;
     if (pct > 0) {
       const start = deg;
