@@ -1,11 +1,12 @@
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import {
   collection,
   doc,
   getDoc,
   getDocs,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const loadingEl = document.getElementById("loading");
@@ -66,6 +67,7 @@ async function loadAllUsers() {
         <button onclick="${acc.banned ? `unbanUser('${u.uid}')` : `banUser('${u.uid}')`}" style="${acc.banned ? 'background:#4aff4a;color:#000;' : 'background:#ff4a4a;'}">
           ${acc.banned ? "UNBAN" : "BAN"}
         </button>
+        <button onclick="confirmDelete('${u.uid}')" style="background:#ff4a4a;">DELETE</button>
       </td>
     </tr>`;
   }
@@ -86,12 +88,39 @@ window.unbanUser = async (uid) => {
   await loadAllUsers();
 };
 
+window.confirmDelete = async (uid) => {
+  const snap = await getDoc(doc(db, "users", uid));
+  if (!snap.exists()) return;
+  const data = snap.data();
+  const p = data.profile || {};
+
+  const modalArea = document.getElementById("modal-area");
+  modalArea.innerHTML = `
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()" style="text-align:center;">
+        <h3 style="color:#ff4a4a;">PERMANENTLY DELETE PERSONNEL?</h3>
+        <p>${p.callsign || "---"} — ${p.displayName || "Unidentified"}</p>
+        <p style="font-size:12px;color:#ff4a4a;">This cannot be undone. Their Firestore record will be erased.</p>
+        <div class="btn-row" style="justify-content:center;">
+          <button onclick="closeModal()" style="background:#333;">CANCEL</button>
+          <button onclick="deleteUser('${uid}')" style="background:#ff4a4a;">DELETE PERMANENTLY</button>
+        </div>
+      </div>
+    </div>`;
+};
+
+window.deleteUser = async (uid) => {
+  await deleteDoc(doc(db, "users", uid));
+  closeModal();
+  statusEl.textContent = "PERSONNEL RECORD DELETED";
+  await loadAllUsers();
+};
+
 window.editUser = async (uid) => {
   const snap = await getDoc(doc(db, "users", uid));
   if (!snap.exists()) return;
   const data = snap.data();
   const p = data.profile || {};
-  const acc = data.account || {};
 
   const modalArea = document.getElementById("modal-area");
   modalArea.innerHTML = `
@@ -108,7 +137,6 @@ window.editUser = async (uid) => {
         <select id="edit-role">
           <option value="user" ${p.role === "user" ? "selected" : ""}>User</option>
           <option value="admin" ${p.role === "admin" ? "selected" : ""}>Admin</option>
-          <option value="officer" ${p.role === "officer" ? "selected" : ""}>Officer</option>
         </select>
         <label>Contact Email</label>
         <input id="edit-email" value="${escapeHtml(p.email || "")}">
