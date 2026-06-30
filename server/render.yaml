@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ucn-terminal-server
+    runtime: python
+    repo: https://github.com/EJones35/UCN-Terminal
+    branch: main
+    buildCommand: pip install -r server/requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /health
+    envVars:
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        value: fleet-command@ucn-terminal.app
