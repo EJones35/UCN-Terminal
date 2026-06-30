@@ -22,7 +22,14 @@ onAuthStateChanged(auth, async (user) => {
   const selfRef = doc(db, "users", user.uid);
   const selfSnap = await getDoc(selfRef);
 
-  if (!selfSnap.exists() || !selfSnap.data().permissions?.admin) {
+  if (!selfSnap.exists()) {
+    window.location.href = "home.html";
+    return;
+  }
+
+  const selfData = selfSnap.data();
+  const selfProfile = selfData.profile || {};
+  if (!(selfData.permissions?.admin || selfProfile.role === "admin")) {
     window.location.href = "home.html";
     return;
   }
@@ -53,7 +60,8 @@ async function loadAllUsers() {
     const p = u.profile || {};
     const acc = u.account || {};
     const banned = acc.banned ? '<span class="banned">BANNED</span>' : '<span class="active">ACTIVE</span>';
-    const adminBadge = u.permissions?.admin ? '<span class="badge-admin">[ADMIN]</span>' : '';
+    const isAdmin = u.permissions?.admin || p.role === "admin";
+    const adminBadge = isAdmin ? '<span class="badge-admin">[ADMIN]</span>' : '';
 
     html += `<tr>
       <td>${p.callsign || "---"}${adminBadge}</td>
@@ -160,7 +168,8 @@ window.saveEdit = async (uid) => {
     "profile.callsign": callsign,
     "profile.rank": rank,
     "profile.role": role,
-    "profile.email": email
+    "profile.email": email,
+    "permissions.admin": role === "admin"
   });
 
   closeModal();
