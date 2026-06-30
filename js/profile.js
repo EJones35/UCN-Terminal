@@ -23,10 +23,11 @@ const DEPLOYMENT_TYPES = [
   { key: "other", label: "OTHER DUTIES", color: "#aa66ff" }
 ];
 
-const ALL_ROLES = [
-  "Captain", "Comms", "First Officer", "Helm", "Navigator",
-  "Chief Engineer", "Engineer", "Tactical", "Weapons",
-  "Radar", "Sensors", "Dock Ops", "Medical", "Logistics"
+const DIVISIONS = [
+  { name: "COMMAND", roles: ["Captain", "XO"] },
+  { name: "OPERATIONS", roles: ["Helm", "Weapons", "Shuttle Helm", "Shuttle Generalist"] },
+  { name: "SCIENCE", roles: ["Radar", "Navigation", "Comms"] },
+  { name: "ENGINEERING", roles: ["D&D", "Manual Engineer", "Chief Engineer", "Shuttle Engineer"] }
 ];
 
 let currentData = null;
@@ -71,8 +72,15 @@ function renderProfile(data, user) {
   el("subScience").classList.toggle("active", subteams.includes("science"));
 
   const rolesGrid = el("rolesGrid");
-  rolesGrid.innerHTML = ALL_ROLES.map(r => `
-    <div class="role-item ${roles[r] ? "role-done" : ""}">${r}</div>
+  rolesGrid.innerHTML = DIVISIONS.map(div => `
+    <div class="division-group">
+      <div class="division-title">${div.name}</div>
+      <div class="division-roles">
+        ${div.roles.map(r => `
+          <div class="role-item ${roles[r] ? "role-done" : ""}">${r}</div>
+        `).join("")}
+      </div>
+    </div>
   `).join("");
 
   const deps = stats.deploymentTypes || { military: 50, formation: 20, exploration: 10, cartography: 10, other: 10 };
