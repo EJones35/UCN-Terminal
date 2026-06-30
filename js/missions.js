@@ -40,7 +40,7 @@ const ROLE_SUBTEAMS = {
 const ALL_MISSION_ROLES = Object.keys(ROLE_SUBTEAMS);
 const SHIPS = ["Havock", "Takanami"];
 
-let filter = "active";
+let filter = "all";
 let missions = [];
 let campaigns = [];
 let currentUserData = null;
@@ -55,6 +55,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("showActive").onclick = () => { filter = "active"; render(); };
   document.getElementById("showCompleted").onclick = () => { filter = "completed"; render(); };
   document.getElementById("showAll").onclick = () => { filter = "all"; render(); };
+  render(); // initial render for filter button styling
 
   try {
     await Promise.all([loadMissions(), loadCampaigns()]);
@@ -92,8 +93,18 @@ function render() {
   const perms = data.permissions || {};
   const p2 = data.profile || {};
   const isAdmin = perms.admin || p2.role === "admin";
+  renderFilterButtons();
   renderCampaigns(uid);
   renderMissions(uid, isAdmin);
+}
+
+function renderFilterButtons() {
+  ["showActive", "showCompleted", "showAll"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove("filter-active");
+  });
+  const activeId = filter === "all" ? "showAll" : filter === "active" ? "showActive" : "showCompleted";
+  document.getElementById(activeId)?.classList.add("filter-active");
 }
 
 function renderCampaigns(uid) {
