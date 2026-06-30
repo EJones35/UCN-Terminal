@@ -139,7 +139,6 @@ function renderMissions(uid, isAdmin) {
   for (const m of filtered) {
     const isCreator = m.createdByUid === uid;
     const isCompleted = m.status === "completed";
-    const canComplete = !isCompleted;
     const campaignName = campaigns.find(c => c.id === m.campaignId)?.name;
     const displayDate = m.completedDate || (m.completedAt ? formatDate(m.completedAt) : "");
 
@@ -161,8 +160,11 @@ function renderMissions(uid, isAdmin) {
           ${isAdmin && m.completedBy ? `<span>COMPLETED BY: ${m.completedBy}</span>` : ""}
           ${displayDate ? `<span>DATE: ${displayDate}</span>` : ""}
         </div>
-        ${canComplete ? `<button onclick="showCompleteMission('${m.id}')" style="background:#4aff4a;color:#000;margin-top:8px;">COMPLETE</button>` : ""}
-        ${isAdmin && !isCompleted ? `<button onclick="deleteMission('${m.id}')" style="background:#ff4a4a;margin-top:8px;margin-left:6px;">DELETE</button>` : ""}
+        <div style="margin-top:8px;">
+          ${!isCompleted ? `<button onclick="showCompleteMission('${m.id}')" style="background:#4aff4a;color:#000;">COMPLETE</button>` : `<button onclick="uncompleteMission('${m.id}')" style="background:#ffcc00;color:#000;">UNCOMPLETE</button>`}
+          ${isAdmin ? `<button onclick="showEditMission('${m.id}')" style="margin-left:6px;">EDIT</button>` : ""}
+          ${isAdmin && !isCompleted ? `<button onclick="deleteMission('${m.id}')" style="background:#ff4a4a;margin-left:6px;">DELETE</button>` : ""}
+        </div>
       </div>`;
   }
 
@@ -342,6 +344,102 @@ async function completeMission(id, role, ship, date) {
   currentUserData = (await getDoc(doc(db, "users", auth.currentUser.uid))).data();
   await loadMissions();
 }
+
+window.uncompleteMission = async (id) => {
+  const m = missions.find(x => x.id === id);
+  if (!m || m.status !== "completed") return;
+
+  const wasCompleter = m.completedByUid === auth.currentUser.uid;
+
+  if (wasCompleter) {
+    const stats = currentUserData.statistics || {};
+    const deps = stats.deploymentTypes || {};
+    const pers = currentUserData.personnel || {};
+    const existingSubteams = pers.subteams || [];
+
+    const depKey = m.type;
+    const shipKey = m.ship ? "ship" + m.ship.charAt(0).toUpperCase() + m.ship.slice(1) : null;
+    const role = m.role;
+    const subteam = role ? ROLE_SUBTEAMS[role] : null;
+
+    const q = query(
+      collection(db, "missions"),
+      where("completedByUid", "==", auth.currentUser.uid),
+      where("status", "==", "completed")
+    );
+    const snap = await getDocs(q);
+    const otherCompletions = [];
+    snap.forEach(d => { if (d.id !== id) otherCompletions.push(d.data()); });
+
+    const roleStillHeld = role && otherCompletions.some(x => x.role === role);
+    const subteamStillHeld = subteam && otherCompletions.some(x => ROLE_SUBTEAMS[x.role] === subteam);
+
+    const updateFields = {
+      "statistics.missions": Math.max(0, (stats.missions || 0) - 1),
+      [`statistics.deploymentTypes.${depKey}`]: Math.max(0, (deps[depKey] || 0) - 1)
+    };
+    if (shipKey) {
+      updateFields[`statistics.${shipKey}`] = Math.max(0, (stats[shipKey] || 0) - 1);
+    }
+    if (role && !roleStillHeld) {
+      updateFields[`personnel.roles.${role}`] = false;
+    }
+    if (subteam && !subteamStillHeld && existingSubteams.includes(subteam)) {
+      updateFields["personnel.subteams"] = existingSubteams.filter(s => s !== subteam);
+    }
+
+    await updateDoc(doc(db, "users", auth.currentUser.uid), updateFields);
+    currentUserData = (await getDoc(doc(db, "users", auth.currentUser.uid))).data();
+  }
+
+  await updateDoc(doc(db, "missions", id), {
+    status: "active",
+    role: "",
+    ship: "",
+    completedBy: "",
+    completedByUid: "",
+    completedDate: "",
+    completedAt: null
+  });
+
+  await loadMissions();
+};
+
+window.showEditMission = (id) => {
+  const m = missions.find(x => x.id === id);
+  if (!m) return;
+  const modalArea = document.getElementById("modal-area");
+  modalArea.innerHTML = `
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>EDIT MISSION</h3>
+        <label>Mission Name</label>
+        <input id="editName" value="${escapeHtml(m.name)}">
+        <label>Description</label>
+        <textarea id="editDesc" rows="3">${escapeHtml(m.description || "")}</textarea>
+        <label>Type</label>
+        <select id="editType">
+          ${MISSION_TYPES.map(t => `
+            <option value="${t.toLowerCase()}" ${m.type === t.toLowerCase() ? "selected" : ""}>${t}</option>
+          `).join("")}
+        </select>
+        <div class="btn-row">
+          <button onclick="document.getElementById('modal-area').innerHTML=''" style="background:#333;">CANCEL</button>
+          <button id="saveEditBtn">SAVE</button>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById("saveEditBtn").onclick = async () => {
+    const name = document.getElementById("editName").value.trim();
+    const desc = document.getElementById("editDesc").value.trim();
+    const type = document.getElementById("editType").value;
+    if (!name) return;
+    await updateDoc(doc(db, "missions", id), { name, description: desc, type });
+    document.getElementById("modal-area").innerHTML = "";
+    await loadMissions();
+  };
+};
 
 window.deleteMission = async (id) => {
   await deleteDoc(doc(db, "missions", id));
