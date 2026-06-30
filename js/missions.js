@@ -16,10 +16,24 @@ import { initNav } from "./nav.js";
 
 initNav("missions");
 
-const ALL_MISSION_ROLES = [
-  "Captain", "XO", "Helm", "Weapons", "Shuttle Helm", "Shuttle Generalist",
-  "Radar", "Navigation", "Comms", "D&D", "Manual Engineer", "Chief Engineer", "Shuttle Engineer"
-];
+const ROLE_SUBTEAMS = {
+  "Captain": "command",
+  "XO": "command",
+  "Helm": "operations",
+  "Weapons": "operations",
+  "Shuttle Helm": "operations",
+  "Shuttle Generalist": "operations",
+  "Radar": "science",
+  "Navigation": "science",
+  "Comms": "science",
+  "D&D": "engineering",
+  "Manual Engineer": "engineering",
+  "Chief Engineer": "engineering",
+  "Shuttle Engineer": "engineering"
+};
+
+const ALL_MISSION_ROLES = Object.keys(ROLE_SUBTEAMS);
+const SHIPS = ["Havock", "Takanami"];
 
 let filter = "active";
 let missions = [];
@@ -75,11 +89,12 @@ function render() {
         </div>
         <p style="font-size:13px;opacity:0.7;margin:6px 0;">${escapeHtml(m.description || "")}</p>
         <div style="font-size:11px;opacity:0.5;display:flex;gap:15px;flex-wrap:wrap;">
-          <span>ROLE: ${m.role || "---"}</span>
           <span>CREATED BY: ${m.createdBy || "---"}</span>
+          ${m.role ? `<span>ROLE: ${m.role}</span>` : ""}
+          ${m.ship ? `<span>SHIP: ${m.ship}</span>` : ""}
           ${m.completedBy ? `<span>COMPLETED BY: ${m.completedBy}</span>` : ""}
         </div>
-        ${canComplete ? `<button onclick="completeMission('${m.id}')" style="background:#4aff4a;color:#000;margin-top:8px;">MARK COMPLETE</button>` : ""}
+        ${canComplete ? `<button onclick="showCompleteMission('${m.id}')" style="background:#4aff4a;color:#000;margin-top:8px;">COMPLETE</button>` : ""}
         ${isCreator && !isCompleted ? `<button onclick="deleteMission('${m.id}')" style="background:#ff4a4a;margin-top:8px;margin-left:6px;">DELETE</button>` : ""}
       </div>`;
   }
@@ -106,10 +121,6 @@ window.showCreateMission = () => {
           <option value="cartography">CARTOGRAPHY</option>
           <option value="other">OTHER</option>
         </select>
-        <label>Required Role</label>
-        <select id="mRole">
-          ${ALL_MISSION_ROLES.map(r => `<option value="${r}">${r}</option>`).join("")}
-        </select>
         <div class="btn-row">
           <button onclick="document.getElementById('modal-area').innerHTML=''" style="background:#333;">CANCEL</button>
           <button id="createMissionBtn">CREATE</button>
@@ -121,7 +132,6 @@ window.showCreateMission = () => {
     const name = document.getElementById("mName").value.trim();
     const desc = document.getElementById("mDesc").value.trim();
     const type = document.getElementById("mType").value;
-    const role = document.getElementById("mRole").value;
     if (!name) return;
     const profile = currentUserData.profile || {};
 
@@ -129,7 +139,6 @@ window.showCreateMission = () => {
       name,
       description: desc,
       type,
-      role,
       status: "active",
       createdBy: profile.callsign || "Unknown",
       createdByUid: auth.currentUser.uid,
@@ -144,36 +153,73 @@ window.showCreateMission = () => {
   };
 };
 
-window.completeMission = async (id) => {
+window.showCompleteMission = (id) => {
+  const modalArea = document.getElementById("modal-area");
+  modalArea.innerHTML = `
+    <div class="overlay" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>COMPLETE MISSION</h3>
+        <label>Role Performed</label>
+        <select id="completeRole">
+          ${ALL_MISSION_ROLES.map(r => `<option value="${r}">${r}</option>`).join("")}
+        </select>
+        <label>Ship</label>
+        <select id="completeShip">
+          ${SHIPS.map(s => `<option value="${s}">${s}</option>`).join("")}
+        </select>
+        <div class="btn-row">
+          <button onclick="document.getElementById('modal-area').innerHTML=''" style="background:#333;">CANCEL</button>
+          <button id="confirmCompleteBtn">CONFIRM</button>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById("confirmCompleteBtn").onclick = () => {
+    const role = document.getElementById("completeRole").value;
+    const ship = document.getElementById("completeShip").value;
+    document.getElementById("modal-area").innerHTML = "";
+    completeMission(id, role, ship);
+  };
+};
+
+async function completeMission(id, role, ship) {
   const m = missions.find(x => x.id === id);
   if (!m) return;
   const profile = currentUserData.profile || {};
   const stats = currentUserData.statistics || {};
   const deps = stats.deploymentTypes || {};
-  const roles = (currentUserData.personnel || {}).roles || {};
+  const pers = currentUserData.personnel || {};
+  const existingRoles = pers.roles || {};
+  const existingSubteams = pers.subteams || [];
+
+  const depKey = m.type || "other";
+  const shipKey = "ship" + ship.charAt(0).toUpperCase() + ship.slice(1);
+
+  const subteam = ROLE_SUBTEAMS[role];
+  const newSubteams = existingSubteams.includes(subteam) ? existingSubteams : [...existingSubteams, subteam];
+
+  const updateFields = {
+    "statistics.missions": (stats.missions || 0) + 1,
+    [`statistics.deploymentTypes.${depKey}`]: (deps[depKey] || 0) + 1,
+    [`statistics.${shipKey}`]: (stats[shipKey] || 0) + 1,
+    [`personnel.roles.${role}`]: true,
+    "personnel.subteams": newSubteams
+  };
+
+  await updateDoc(doc(db, "users", auth.currentUser.uid), updateFields);
 
   await updateDoc(doc(db, "missions", id), {
     status: "completed",
+    role,
+    ship,
     completedBy: profile.callsign || "Unknown",
     completedByUid: auth.currentUser.uid,
     completedAt: serverTimestamp()
   });
 
-  const depKey = m.type || "other";
-  const depCount = (deps[depKey] || 0) + 1;
-
-  const roleKey = m.role;
-  const roleUpdate = roleKey ? { [`personnel.roles.${roleKey}`]: true } : {};
-
-  await updateDoc(doc(db, "users", auth.currentUser.uid), {
-    "statistics.missions": (stats.missions || 0) + 1,
-    [`statistics.deploymentTypes.${depKey}`]: depCount,
-    ...roleUpdate
-  });
-
   currentUserData = (await getDoc(doc(db, "users", auth.currentUser.uid))).data();
   await loadMissions();
-};
+}
 
 window.deleteMission = async (id) => {
   await deleteDoc(doc(db, "missions", id));

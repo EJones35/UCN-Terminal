@@ -30,6 +30,8 @@ const DIVISIONS = [
   { name: "ENGINEERING", roles: ["D&D", "Manual Engineer", "Chief Engineer", "Shuttle Engineer"] }
 ];
 
+const SUBTEAMS = ["command", "operations", "science", "engineering"];
+
 let currentData = null;
 
 function el(id) { return document.getElementById(id); }
@@ -64,12 +66,16 @@ function renderProfile(data, user) {
   const medals = pers.medals || [];
   el("pfMedals").textContent = medals.length ? medals.join(", ") : "None recorded.";
 
-  el("shipHavock").style.width = (stats.shipHavock || 100) + "%";
-  el("shipTakanami").style.width = (stats.shipTakanami || 0) + "%";
+  const shipHavock = stats.shipHavock || 0;
+  const shipTakanami = stats.shipTakanami || 0;
+  const shipTotal = shipHavock + shipTakanami || 1;
+  el("shipHavock").style.width = (shipHavock / shipTotal * 100) + "%";
+  el("shipTakanami").style.width = (shipTakanami / shipTotal * 100) + "%";
 
-  const subteams = pers.subteams || ["command", "science"];
-  el("subCommand").classList.toggle("active", subteams.includes("command"));
-  el("subScience").classList.toggle("active", subteams.includes("science"));
+  const subteams = pers.subteams || [];
+  SUBTEAMS.forEach(st => {
+    el("sub" + st.charAt(0).toUpperCase() + st.slice(1)).classList.toggle("active", subteams.includes(st));
+  });
 
   const rolesGrid = el("rolesGrid");
   rolesGrid.innerHTML = DIVISIONS.map(div => `
@@ -125,7 +131,7 @@ async function loadRecentMissions(uid) {
     const m = d.data();
     html += `<div style="font-size:13px;padding:6px 10px;background:rgba(255,255,255,0.04);border-left:3px solid #4a9eff;">
       <strong>${escapeHtml(m.name)}</strong>
-      <span style="opacity:0.5;margin-left:10px;">${m.type || ""} \u2022 ${m.role || ""}</span>
+      <span style="opacity:0.5;margin-left:10px;">${m.type || ""} \u2022 ${m.role || ""} \u2022 ${m.ship || ""}</span>
     </div>`;
   });
   html += "</div>";
