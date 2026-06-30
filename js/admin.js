@@ -8,6 +8,9 @@ import {
   updateDoc,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { initNav } from "./nav.js";
+
+initNav("admin");
 const loadingEl = document.getElementById("loading");
 const tableEl = document.getElementById("user-table");
 const statusEl = document.getElementById("status");

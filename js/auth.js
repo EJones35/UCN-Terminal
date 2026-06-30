@@ -41,7 +41,9 @@ async function ensureUserDocument(user) {
         rank: "Ensign",
         currentShipId: "",
         role: isAdmin ? "admin" : "user",
-        email: user.email
+        email: user.email,
+        pronouns: "",
+        enlistmentDate: ""
       },
       personnel: {
         serviceNumber: callsign,
