@@ -139,7 +139,7 @@ function renderMissions(uid, isAdmin) {
   for (const m of filtered) {
     const isCreator = m.createdByUid === uid;
     const isCompleted = m.status === "completed";
-    const canComplete = !isCompleted && m.createdByUid !== uid;
+    const canComplete = !isCompleted;
     const campaignName = campaigns.find(c => c.id === m.campaignId)?.name;
     const displayDate = m.completedDate || (m.completedAt ? formatDate(m.completedAt) : "");
 
@@ -162,7 +162,7 @@ function renderMissions(uid, isAdmin) {
           ${displayDate ? `<span>DATE: ${displayDate}</span>` : ""}
         </div>
         ${canComplete ? `<button onclick="showCompleteMission('${m.id}')" style="background:#4aff4a;color:#000;margin-top:8px;">COMPLETE</button>` : ""}
-        ${isCreator && !isCompleted ? `<button onclick="deleteMission('${m.id}')" style="background:#ff4a4a;margin-top:8px;margin-left:6px;">DELETE</button>` : ""}
+        ${isAdmin && !isCompleted ? `<button onclick="deleteMission('${m.id}')" style="background:#ff4a4a;margin-top:8px;margin-left:6px;">DELETE</button>` : ""}
       </div>`;
   }
 
