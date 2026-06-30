@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UCN MISSION LOG</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="starfield">
+
+<div id="nav"></div>
+
+<div class="panel" style="max-width:900px;margin:20px auto;">
+  <h2>UCN MISSION LOG</h2>
+
+  <div style="display:flex;gap:10px;margin-bottom:15px;">
+    <button id="showActive" class="filter-active">ACTIVE</button>
+    <button id="showCompleted">COMPLETED</button>
+    <button id="showAll">ALL</button>
+  </div>
+
+  <div id="mission-list"></div>
+</div>
+
+<div id="modal-area"></div>
+
+<script type="module" src="js/missions.js"></script>
+</body>
+</html>

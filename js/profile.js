@@ -1,9 +1,15 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import {
+  collection,
   doc,
   getDoc,
-  updateDoc
+  getDocs,
+  updateDoc,
+  query,
+  orderBy,
+  limit,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { initNav } from "./nav.js";
 
@@ -72,9 +78,36 @@ function renderProfile(data, user) {
   const deps = stats.deploymentTypes || { military: 50, formation: 20, exploration: 10, cartography: 10, other: 10 };
   renderPieChart(deps);
 
+  loadRecentMissions(user.uid);
+
   document.getElementById("editCallsign").onclick = () => editField("callsign", p.callsign || "");
   document.getElementById("editPronouns").onclick = () => editField("pronouns", p.pronouns || "");
   document.getElementById("editBio").onclick = () => editField("biography", pers.biography || "", true);
+}
+
+async function loadRecentMissions(uid) {
+  const q = query(
+    collection(db, "missions"),
+    where("completedByUid", "==", uid),
+    orderBy("completedAt", "desc"),
+    limit(10)
+  );
+  const snap = await getDocs(q);
+  const el = document.getElementById("recent-missions");
+  if (snap.empty) {
+    el.innerHTML = "<p style='opacity:0.5;'>No completed missions.</p>";
+    return;
+  }
+  let html = "<div style='display:flex;flex-direction:column;gap:6px;'>";
+  snap.forEach(d => {
+    const m = d.data();
+    html += `<div style="font-size:13px;padding:6px 10px;background:rgba(255,255,255,0.04);border-left:3px solid #4a9eff;">
+      <strong>${escapeHtml(m.name)}</strong>
+      <span style="opacity:0.5;margin-left:10px;">${m.type || ""}</span>
+    </div>`;
+  });
+  html += "</div>";
+  el.innerHTML = html;
 }
 
 function editField(field, current, multiline = false) {

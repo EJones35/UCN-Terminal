@@ -9,6 +9,7 @@ const ASSETS = [
   "/home.html",
   "/profile.html",
   "/admin.html",
+  "/missions.html",
   "/suspended.html",
   "/css/styles.css",
   "/js/app.js",
@@ -20,6 +21,7 @@ const ASSETS = [
   "/js/nav.js",
   "/js/profile.js",
   "/js/admin.js",
+  "/js/missions.js",
   "/manifest.json"
 ];
 

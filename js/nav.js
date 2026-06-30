@@ -24,7 +24,8 @@ export function initNav(currentPage) {
 
     const pages = [
       { id: "home", label: "TERMINAL", href: "home.html" },
-      { id: "profile", label: "SERVICE RECORD", href: "profile.html" }
+      { id: "profile", label: "SERVICE RECORD", href: "profile.html" },
+      { id: "missions", label: "MISSIONS", href: "missions.html" }
     ];
 
     if (isAdmin) {
