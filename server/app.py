@@ -13,14 +13,21 @@ SERVICE_ACCOUNT = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "fleet-command@ucn-terminal.app")
 
+db = None
 if SERVICE_ACCOUNT:
-    cred = credentials.Certificate(json.loads(SERVICE_ACCOUNT))
-    firebase_admin.initialize_app(cred, {"projectId": "ucn-terminal"})
-    db = firestore.client()
+    try:
+        cred = credentials.Certificate(json.loads(SERVICE_ACCOUNT))
+        firebase_admin.initialize_app(cred, {"projectId": "ucn-terminal"})
+        db = firestore.client()
+    except Exception as e:
+        print(f"Firebase init failed: {e}")
 
 @app.route("/api/delete-user", methods=["POST"])
 def delete_user():
     try:
+        if db is None:
+            return jsonify({"error": "Firebase not configured"}), 500
+
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return jsonify({"error": "Missing authorization"}), 401
@@ -66,7 +73,7 @@ def delete_user():
 
 
 def send_notification(to_email, callsign):
-    subject = "UCN Terminal — Account Deleted"
+    subject = "UCN Terminal \u2014 Account Deleted"
     body = (
         f"Your UCN Terminal account ({callsign}) has been permanently deleted "
         "by Fleet Command.\n\n"
@@ -95,7 +102,7 @@ def send_notification(to_email, callsign):
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok", "firebase": db is not None})
 
 
 if __name__ == "__main__":
