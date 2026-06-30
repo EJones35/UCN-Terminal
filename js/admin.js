@@ -8,7 +8,7 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-const API_URL = "https://ucn-terminal-server.onrender.com";
+const API_URL = "https://smidge.pythonanywhere.com/";
 const loadingEl = document.getElementById("loading");
 const tableEl = document.getElementById("user-table");
 const statusEl = document.getElementById("status");
