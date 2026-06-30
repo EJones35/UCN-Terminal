@@ -1,4 +1,4 @@
-const CACHE = "ucn-terminal-v6";
+const CACHE = "ucn-terminal-v7";
 
 const ASSETS = [
   "/",

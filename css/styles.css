@@ -405,6 +405,29 @@ button:hover {
   color: #ffcc00;
 }
 
+/* CAMPAIGN */
+.campaign-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(74,158,255,0.12);
+  border-left: 3px solid #ffcc00;
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.campaign-track {
+  height: 4px;
+  background: #08121f;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.campaign-fill {
+  height: 100%;
+  background: #ffcc00;
+  border-radius: 2px;
+  transition: width .5s;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .profile-container { grid-template-columns: 1fr; }

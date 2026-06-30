@@ -17,10 +17,10 @@ initNav("profile");
 
 const DEPLOYMENT_TYPES = [
   { key: "military", label: "MILITARY", color: "#ff4a4a" },
-  { key: "formation", label: "FORMATION", color: "#4a9eff" },
   { key: "exploration", label: "EXPLORATION", color: "#4aff4a" },
-  { key: "cartography", label: "CARTOGRAPHY", color: "#ffcc00" },
-  { key: "other", label: "OTHER DUTIES", color: "#aa66ff" }
+  { key: "diplomacy", label: "DIPLOMACY", color: "#4a9eff" },
+  { key: "intrigue", label: "INTRIGUE", color: "#aa66ff" },
+  { key: "frontline", label: "FRONTLINE", color: "#ffcc00" }
 ];
 
 const DIVISIONS = [
@@ -131,7 +131,7 @@ async function loadRecentMissions(uid) {
     const m = d.data();
     html += `<div style="font-size:13px;padding:6px 10px;background:rgba(255,255,255,0.04);border-left:3px solid #4a9eff;">
       <strong>${escapeHtml(m.name)}</strong>
-      <span style="opacity:0.5;margin-left:10px;">${m.type || ""} \u2022 ${m.role || ""} \u2022 ${m.ship || ""}</span>
+      <span style="opacity:0.5;margin-left:10px;">${m.type || ""} \u2022 ${m.role || ""} \u2022 ${m.ship || ""}${m.completedDate ? " \u2022 " + m.completedDate : ""}</span>
     </div>`;
   });
   html += "</div>";
