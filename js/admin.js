@@ -5,10 +5,9 @@ import {
   doc,
   getDoc,
   getDocs,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-
-const API_URL = "https://smidge.pythonanywhere.com/";
 const loadingEl = document.getElementById("loading");
 const tableEl = document.getElementById("user-table");
 const statusEl = document.getElementById("status");
@@ -108,45 +107,19 @@ window.confirmDelete = async (uid) => {
       <div class="modal" onclick="event.stopPropagation()" style="text-align:center;">
         <h3 style="color:#ff4a4a;">PERMANENTLY DELETE PERSONNEL?</h3>
         <p>${escapeHtml(p.callsign || "---")} — ${escapeHtml(p.displayName || "Unidentified")}</p>
-        <p style="font-size:12px;">This will delete the Firebase Auth account, Firestore record, and notify them.</p>
+        <p style="font-size:12px;color:#ff4a4a;">This cannot be undone. Their Firestore record will be erased.</p>
         <div class="btn-row" style="justify-content:center;">
           <button onclick="closeModal()" style="background:#333;">CANCEL</button>
           <button onclick="deleteUser('${uid}')" style="background:#ff4a4a;">DELETE PERMANENTLY</button>
         </div>
       </div>
     </div>`;
-  window._deleteTarget = { uid, email: p.email, callsign: p.callsign };
 };
 
-window.deleteUser = async () => {
-  const target = window._deleteTarget;
-  if (!target) return;
-
-  try {
-    const token = await auth.currentUser.getIdToken();
-    const res = await fetch(`${API_URL}/api/delete-user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        uid: target.uid,
-        email: target.email,
-        callsign: target.callsign
-      })
-    });
-
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error);
-
-    statusEl.textContent = "PERSONNEL RECORD DELETED";
-  } catch (err) {
-    statusEl.textContent = `DELETE FAILED: ${err.message}`;
-  }
-
+window.deleteUser = async (uid) => {
+  await deleteDoc(doc(db, "users", uid));
   closeModal();
-  window._deleteTarget = null;
+  statusEl.textContent = "PERSONNEL RECORD DELETED";
   await loadAllUsers();
 };
 
